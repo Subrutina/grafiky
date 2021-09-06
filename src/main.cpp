@@ -25,12 +25,14 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+unsigned int loadTexture(char const * path);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
+
 
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
@@ -161,8 +163,151 @@ int main() {
 
     // build and compile shaders
     // -------------------------
+    Shader baconShader("resources/shaders/bacon.vs", "resources/shaders/bacon.fs");
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
+    Shader pyramidShader("resources/shaders/pyramid.vs", "resources/shaders/pyramid.fs");
+    Shader lightSourceCubeShader("resources/shaders/lightCube.vs", "resources/shaders/lightCube.fs");
+    //kocka:
+    float vertices[] = {
+            -0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f, -0.5f,
+            0.5f,  0.5f, -0.5f,
+            0.5f,  0.5f, -0.5f,
+            -0.5f,  0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
 
+            -0.5f, -0.5f,  0.5f,
+            0.5f, -0.5f,  0.5f,
+            0.5f,  0.5f,  0.5f,
+            0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
+            -0.5f, -0.5f,  0.5f,
+
+            -0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
+            -0.5f, -0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
+
+            0.5f,  0.5f,  0.5f,
+            0.5f,  0.5f, -0.5f,
+            0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f,  0.5f,
+            0.5f,  0.5f,  0.5f,
+
+            -0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f,  0.5f,
+            0.5f, -0.5f,  0.5f,
+            -0.5f, -0.5f,  0.5f,
+            -0.5f, -0.5f, -0.5f,
+
+            -0.5f,  0.5f, -0.5f,
+            0.5f,  0.5f, -0.5f,
+            0.5f,  0.5f,  0.5f,
+            0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f, -0.5f,
+    };
+
+    //waffle piramida:
+    float waffleVertices[] = {
+            //position          //texture   //normals
+            0.0f,  0.0f,  0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 0.5f,
+            0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.5f,
+            -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.5f,
+
+            0.0f,  0.0f,  0.5f, 0.5f, 1.0f, -1.0f, 0.0f, 0.5f,
+            -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, -1.0f, 0.0f, 0.5f,
+            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.5f,
+
+            0.0f,  0.0f,  0.5f, 0.5f, 1.0f, 0.0f, -1.0f, 0.5f,
+            -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, -1.0f, 0.5f,
+            0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, -1.0f, 0.5f,
+
+            0.0f,  0.0f,  0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 0.5f,
+            0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.5f,
+            0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.5f,
+
+
+            0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
+            -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
+            0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+            0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f
+
+    };
+
+    float BaconVertices[] = {
+            //position          //texture
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+
+    unsigned int indices[] = {
+            0, 1, 3,  // first Triangle
+            1, 2, 3   // second Triangle
+    };
+    //svetlo:
+    unsigned int VBO, VAO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindVertexArray(VAO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+
+    //Waffle Piramida:
+
+    unsigned int WaffleVBO, WaffleVAO;
+
+    glGenVertexArrays(1, &WaffleVAO);
+    glGenBuffers(1, &WaffleVBO);
+
+    glBindVertexArray(WaffleVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, WaffleVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(waffleVertices), waffleVertices, GL_STATIC_DRAW);
+
+    glBindVertexArray(WaffleVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+
+    //bacon avenue:
+    unsigned int BaconVAO, BaconVBO, BaconEBO;
+    glGenVertexArrays(1, &BaconVAO);
+    glGenBuffers(1, &BaconVBO);
+    glGenBuffers(1, &BaconEBO);
+
+    glBindVertexArray(BaconVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, BaconVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(BaconVertices), BaconVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, BaconEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    /*
     // load models
     // -----------
     Model ourModel("resources/objects/backpack/backpack.obj");
@@ -177,11 +322,28 @@ int main() {
     pointLight.constant = 1.0f;
     pointLight.linear = 0.09f;
     pointLight.quadratic = 0.032f;
+     */
 
 
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+
+    //teksture:
+    unsigned int texture1 = loadTexture(FileSystem::getPath("resources/textures/waffle.jpg").c_str());
+    unsigned int texture2 = loadTexture(FileSystem::getPath("resources/textures/baconAvenue2.jpg").c_str());
+
+    // don't forget to enable shader before setting uniforms
+    ourShader.use();
+    pyramidShader.use();
+    lightSourceCubeShader.use();
+    lightSourceCubeShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+    pyramidShader.setInt("texture1", 0);
+    baconShader.use();
+    baconShader.setInt("texture2", 1);
+
+    stbi_set_flip_vertically_on_load(false);
 
     // render loop
     // -----------
@@ -202,8 +364,90 @@ int main() {
         glClearColor(programState->clearColor.r, programState->clearColor.g, programState->clearColor.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // don't forget to enable shader before setting uniforms
-        ourShader.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
+        // view/projection transformations
+        glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = programState->camera.GetViewMatrix();
+
+
+        // svetlo:
+        lightSourceCubeShader.setMat4("projection", projection);
+        lightSourceCubeShader.setMat4("view", view);
+
+        glm::mat4 modelS = glm::mat4(1.0f);
+        modelS = glm::translate(modelS, glm::vec3(0.0f, 10.0f, 0.0f));
+        modelS = glm::rotate(modelS, 0.0f, glm::vec3(0.5f, 1.0f, 0.0f));
+        lightSourceCubeShader.setMat4("model", modelS);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //piramida1
+        pyramidShader.use();
+        pyramidShader.setMat4("projection", projection);
+        pyramidShader.setMat4("view", view);
+
+        glm::mat4 modelW = glm::mat4(1.0f);
+        modelW = glm::translate(modelW, glm::vec3(0.0f, 0.0f, -3.0f));
+        modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+        modelW = glm::scale(modelW, glm::vec3(6.0f));
+
+
+        pyramidShader.setMat4("model", modelW);
+
+        glBindVertexArray(WaffleVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 18);
+
+        //piramida2:
+        modelW = glm::mat4(1.0f);
+        modelW = glm::translate(modelW, glm::vec3(7.0f, 0.0f, -6.0f));
+        modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+        modelW = glm::scale(modelW, glm::vec3(4.0f));
+
+        pyramidShader.setMat4("model", modelW);
+
+        glBindVertexArray(WaffleVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 18);
+
+        //piramida3:
+        modelW = glm::mat4(1.0f);
+        modelW = glm::translate(modelW, glm::vec3(-7.0f, 0.0f, -6.0f));
+        modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+        modelW = glm::scale(modelW, glm::vec3(4.0f));
+        pyramidShader.setMat4("model", modelW);
+        glBindVertexArray(WaffleVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 18);
+
+        //bacon:
+        baconShader.use();
+        baconShader.setMat4("projection", projection);
+        baconShader.setMat4("view", view);
+
+        glBindVertexArray(BaconVAO);
+
+        glm::mat4 modelB = glm::mat4(1.0f);
+        modelB = glm::translate(modelB, glm::vec3(0.0f, -2.5f, 2.0f));
+        modelB = glm::rotate(modelB, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        modelB = glm::rotate(modelB, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        modelB = glm::scale(modelB, glm::vec3(2.0f, 1.0f, 3.0f));
+
+        baconShader.setMat4("model", modelB);
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+
+
+
+
+
+
+
+        /*
         pointLight.position = glm::vec3(4.0 * cos(currentFrame), 4.0f, 4.0 * sin(currentFrame));
         ourShader.setVec3("pointLight.position", pointLight.position);
         ourShader.setVec3("pointLight.ambient", pointLight.ambient);
@@ -228,6 +472,8 @@ int main() {
         model = glm::scale(model, glm::vec3(programState->backpackScale));    // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
+
+         */
 
         if (programState->ImGuiEnabled)
             DrawImGui(programState);
@@ -299,7 +545,42 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     programState->camera.ProcessMouseScroll(yoffset);
 }
+unsigned int loadTexture(char const * path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
 
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
+}
 void DrawImGui(ProgramState *programState) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
