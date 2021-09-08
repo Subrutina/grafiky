@@ -281,7 +281,7 @@ int main() {
     //teksture:
     unsigned int texture1 = loadTexture(FileSystem::getPath("resources/textures/waffle.jpg").c_str());
     unsigned int texture2 = loadTexture(FileSystem::getPath("resources/textures/waffle.jpg").c_str());
-    unsigned int texture3 = loadTexture(FileSystem::getPath("resources/textures/waffleS.jpg").c_str());
+    unsigned int texture3 = loadTexture(FileSystem::getPath("resources/textures/wafflee.jpg").c_str());
     // don't forget to enable shader before setting uniforms
     ourShader.use();
     pyramidShader.use();
@@ -335,7 +335,7 @@ int main() {
 
         // material properties
 
-        pyramidShader.setFloat("material.shininess", 256.0f);
+        pyramidShader.setFloat("material.shininess", 32.0f);
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
