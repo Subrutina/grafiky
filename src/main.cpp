@@ -33,6 +33,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
+glm::vec3 lightPos(3.0f, 10.0f, 2.0f);
 
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
@@ -332,16 +333,18 @@ int main() {
 
     //teksture:
     unsigned int texture1 = loadTexture(FileSystem::getPath("resources/textures/waffle.jpg").c_str());
-    unsigned int texture2 = loadTexture(FileSystem::getPath("resources/textures/baconAvenue2.jpg").c_str());
-
+    unsigned int texture2 = loadTexture(FileSystem::getPath("resources/textures/waffle.jpg").c_str());
+    unsigned int texture3 = loadTexture(FileSystem::getPath("resources/textures/waffleS.jpg").c_str());
     // don't forget to enable shader before setting uniforms
     ourShader.use();
     pyramidShader.use();
-    lightSourceCubeShader.use();
-    lightSourceCubeShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
-    pyramidShader.setInt("texture1", 0);
+    pyramidShader.setInt("material.diffuse", 0);
+    pyramidShader.setInt("material.specular", 2);
+
+
     baconShader.use();
     baconShader.setInt("texture2", 1);
+
 
     stbi_set_flip_vertically_on_load(false);
 
@@ -370,6 +373,25 @@ int main() {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, texture3);
+
+        lightSourceCubeShader.use();
+        lightSourceCubeShader.setVec3("lightColor",  1.0f, 0.0f, 0.0f);
+
+        pyramidShader.use();
+        pyramidShader.setVec3("light.position", lightPos);
+        pyramidShader.setVec3("viewPos", programState->camera.Position);
+
+        pyramidShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+        pyramidShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+        pyramidShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+        // material properties
+
+
+        pyramidShader.setFloat("material.shininess", 16.0f);
+
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = programState->camera.GetViewMatrix();
@@ -380,8 +402,8 @@ int main() {
         lightSourceCubeShader.setMat4("view", view);
 
         glm::mat4 modelS = glm::mat4(1.0f);
-        modelS = glm::translate(modelS, glm::vec3(0.0f, 10.0f, 0.0f));
-        modelS = glm::rotate(modelS, 0.0f, glm::vec3(0.5f, 1.0f, 0.0f));
+        modelS = glm::translate(modelS, lightPos);
+        //modelS = glm::rotate(modelS, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 1.0f));
         lightSourceCubeShader.setMat4("model", modelS);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -431,10 +453,10 @@ int main() {
         glBindVertexArray(BaconVAO);
 
         glm::mat4 modelB = glm::mat4(1.0f);
-        modelB = glm::translate(modelB, glm::vec3(0.0f, -2.5f, 2.0f));
+        modelB = glm::translate(modelB, glm::vec3(0.0f, -4.5f, 2.0f));
         modelB = glm::rotate(modelB, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         modelB = glm::rotate(modelB, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        modelB = glm::scale(modelB, glm::vec3(2.0f, 1.0f, 3.0f));
+        modelB = glm::scale(modelB, glm::vec3(50.0f, 6.0f, 3.0f));
 
         baconShader.setMat4("model", modelB);
 
