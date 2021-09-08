@@ -34,7 +34,7 @@ bool paused = false;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
-glm::vec3 lightPos(-3.0f, 3.0f, -5.0f);
+glm::vec3 lightPos(0.0f, 5.0f, 0.0f);
 
 
 float lastX = SCR_WIDTH / 2.0f;
@@ -326,7 +326,7 @@ int main() {
 
 
         pyramidShader.use();
-        pyramidShader.setVec3("light.position", lightPos);
+        pyramidShader.setVec3("light.direction", glm::vec3 (-0.2f, -1.0f, -0.3f));
         pyramidShader.setVec3("viewPos", camera.Position);
 
         pyramidShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
@@ -335,25 +335,11 @@ int main() {
 
         // material properties
 
-        pyramidShader.setFloat("material.shininess", 128.0f);
+        pyramidShader.setFloat("material.shininess", 256.0f);
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
-
-
-        // svetlo1:
-        lightSourceCubeShader.use();
-        lightSourceCubeShader.setMat4("projection", projection);
-        lightSourceCubeShader.setMat4("view", view);
-
-        glm::mat4 modelS = glm::mat4(1.0f);
-        modelS = glm::translate(modelS, lightPos);
-        //modelS = glm::rotate(modelS, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 1.0f));
-        lightSourceCubeShader.setVec3("lightColor", glm::vec3 (1.0f));
-        lightSourceCubeShader.setMat4("model", modelS);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
         //piramida1
