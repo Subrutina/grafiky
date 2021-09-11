@@ -25,7 +25,10 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+
+
 unsigned int loadTexture(char const * path);
+unsigned int loadCubeMap(vector<std::string> faces);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -114,7 +117,8 @@ int main() {
     Shader baconShader("resources/shaders/bacon.vs", "resources/shaders/bacon.fs");
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     Shader pyramidShader("resources/shaders/pyramid.vs", "resources/shaders/pyramid.fs");
-    Shader lightSourceCubeShader("resources/shaders/lightCube.vs", "resources/shaders/lightCube.fs");
+    //Shader lightSourceCubeShader("resources/shaders/lightCube.vs", "resources/shaders/lightCube.fs");
+    Shader skyBoxShader("resources/shaders/skyBox.vs", "resources/shaders/skyBox.fs");
     //kocka:
     float vertices[] = {
             -0.5f, -0.5f, -0.5f,
@@ -201,6 +205,51 @@ int main() {
             0, 1, 3,  // first Triangle
             1, 2, 3   // second Triangle
     };
+
+    float skyboxVertices[] = {
+            // positions
+            -1.0f,  1.0f, -1.0f,
+            -1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+
+            -1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+
+            -1.0f, -1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+
+            -1.0f,  1.0f, -1.0f,
+            1.0f,  1.0f, -1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f, -1.0f,
+
+            -1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+            1.0f, -1.0f,  1.0f
+    };
     //svetlo:
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
@@ -255,6 +304,18 @@ int main() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+
+    // skybox VAO
+    unsigned int skyboxVAO, skyboxVBO;
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+
     /*
     // load models
     // -----------
@@ -279,21 +340,38 @@ int main() {
 
 
     //teksture:
+
+    stbi_set_flip_vertically_on_load(false);
+
     unsigned int texture1 = loadTexture(FileSystem::getPath("resources/textures/waffle.jpg").c_str());
     unsigned int texture2 = loadTexture(FileSystem::getPath("resources/textures/waffle.jpg").c_str());
     unsigned int texture3 = loadTexture(FileSystem::getPath("resources/textures/wafflee.jpg").c_str());
+
+    vector<std::string> faces
+            {
+                    FileSystem::getPath("resources/textures/skybox/right.png"),
+                    FileSystem::getPath("resources/textures/skybox/left.png"),
+                    FileSystem::getPath("resources/textures/skybox/top.png"),
+                    FileSystem::getPath("resources/textures/skybox/bottom.png"),
+                    FileSystem::getPath("resources/textures/skybox/front.png"),
+                    FileSystem::getPath("resources/textures/skybox/back.png")
+            };
+    unsigned int cubemapTexture = loadCubeMap(faces);
+
     // don't forget to enable shader before setting uniforms
     ourShader.use();
     pyramidShader.use();
     pyramidShader.setInt("material.diffuse", 0);
     pyramidShader.setInt("material.specular", 2);
 
+    skyBoxShader.use();
+    skyBoxShader.setInt("skybox", 0);
 
     baconShader.use();
     baconShader.setInt("texture2", 1);
 
 
-    stbi_set_flip_vertically_on_load(false);
+
 
     // render loop
     // -----------
@@ -313,6 +391,14 @@ int main() {
         // ------
         glClearColor(0.0f, 0.0f, 1.0f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // view/projection transformations
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+
+
+
+
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
@@ -336,10 +422,6 @@ int main() {
         // material properties
 
         pyramidShader.setFloat("material.shininess", 32.0f);
-
-        // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = camera.GetViewMatrix();
 
 
         //piramida1
@@ -395,6 +477,19 @@ int main() {
         baconShader.setMat4("model", modelB);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        //skybox
+        glDepthMask(GL_FALSE);
+        glDepthFunc(GL_LEQUAL);
+        skyBoxShader.use();
+        skyBoxShader.setMat4("view", glm::mat4(glm::mat3(view)));
+        skyBoxShader.setMat4("projection", projection);
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
 
 
         /*
@@ -525,6 +620,41 @@ unsigned int loadTexture(char const * path)
 
     return textureID;
 }
+
+unsigned int loadCubeMap(vector<std::string> faces){
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID); //obratiti paznju kako se aktivira ovo, nije GL_TEXTURE_2D
+
+    int width, height, nrChannels;
+    unsigned char* data;
+
+    for(unsigned int i = 0; i < faces.size(); i++){
+        data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        if(data){
+            //u redosledu kojem smo naveli teksture sada se mapiraju na cubeMap
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
+                         GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        }
+        else{
+            std::cerr << "Failed to load cube map texture\n";
+            return -1;
+        }
+
+        stbi_image_free(data);
+    }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+
+    return textureID;
+
+}
+
 
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
