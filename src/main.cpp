@@ -412,12 +412,20 @@ int main() {
 
 
         pyramidShader.use();
-        pyramidShader.setVec3("light.direction", glm::vec3 (-0.2f, -1.0f, -0.3f));
+        pyramidShader.setVec3("light.direction", camera.Front);
+        pyramidShader.setVec3("light.position", camera.Position);
+        pyramidShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+        pyramidShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.0f)));
         pyramidShader.setVec3("viewPos", camera.Position);
 
-        pyramidShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-        pyramidShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-        pyramidShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+        pyramidShader.setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
+        pyramidShader.setVec3("light.diffuse", 0.8f, 0.8f, 0.8f);
+        pyramidShader.setVec3("light.specular", 0.8f, 0.8f, 0.8f);
+
+        pyramidShader.setFloat("light.constant", 1.0f);
+        pyramidShader.setFloat("light.linear", 0.09f);
+        pyramidShader.setFloat("light.quadratic", 0.032f);
 
         // material properties
 
