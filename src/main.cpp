@@ -305,7 +305,7 @@ int main() {
     stbi_set_flip_vertically_on_load(false);
 
     unsigned int texture1 = loadTexture(FileSystem::getPath("resources/textures/waffle.jpg").c_str());
-    unsigned int texture2 = loadTexture(FileSystem::getPath("resources/textures/waffle.jpg").c_str());
+    unsigned int texture2 = loadTexture(FileSystem::getPath("resources/textures/kiki.jpg").c_str());
     unsigned int texture3 = loadTexture(FileSystem::getPath("resources/textures/wafflee.jpg").c_str());
 
     unsigned int finnTexture = loadTexture(FileSystem::getPath("resources/objects/finiii/Finn.png").c_str());
@@ -446,7 +446,7 @@ int main() {
         modelB = glm::translate(modelB, glm::vec3(0.0f, -4.5f, 2.0f));
         modelB = glm::rotate(modelB, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         modelB = glm::rotate(modelB, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        modelB = glm::scale(modelB, glm::vec3(50.0f, 6.0f, 3.0f));
+        modelB = glm::scale(modelB, glm::vec3(100.0f, 6.0f, 3.0f));
 
         baconShader.setMat4("model", modelB);
 
