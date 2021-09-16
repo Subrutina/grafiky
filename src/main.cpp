@@ -37,7 +37,7 @@ bool paused = false;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
-glm::vec3 lightPos(0.0f, 5.0f, 0.0f);
+glm::vec3 lightPos(0.0f, 0.0f, 11.0f);
 
 
 float lastX = SCR_WIDTH / 2.0f;
@@ -47,25 +47,6 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
-struct PointLight {
-    glm::vec3 position;
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-
-    float constant;
-    float linear;
-    float quadratic;
-};
-
-
-
-
-
-
-
-
 
 
 int main() {
@@ -119,6 +100,9 @@ int main() {
     Shader pyramidShader("resources/shaders/pyramid.vs", "resources/shaders/pyramid.fs");
     //Shader lightSourceCubeShader("resources/shaders/lightCube.vs", "resources/shaders/lightCube.fs");
     Shader skyBoxShader("resources/shaders/skyBox.vs", "resources/shaders/skyBox.fs");
+    Model SDModel("resources/objects/finiii/Finn.obj");
+    //SDModel.SetShaderTextureNamePrefix("material.");
+    Shader SDShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     //kocka:
     float vertices[] = {
             -0.5f, -0.5f, -0.5f,
@@ -316,29 +300,6 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 
-    /*
-    // load models
-    // -----------
-    Model ourModel("resources/objects/backpack/backpack.obj");
-    ourModel.SetShaderTextureNamePrefix("material.");
-
-    PointLight& pointLight = programState->pointLight;
-    pointLight.position = glm::vec3(4.0f, 4.0, 0.0);
-    pointLight.ambient = glm::vec3(0.1, 0.1, 0.1);
-    pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
-    pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
-
-    pointLight.constant = 1.0f;
-    pointLight.linear = 0.09f;
-    pointLight.quadratic = 0.032f;
-     */
-
-
-
-    // draw in wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-
     //teksture:
 
     stbi_set_flip_vertically_on_load(false);
@@ -347,6 +308,7 @@ int main() {
     unsigned int texture2 = loadTexture(FileSystem::getPath("resources/textures/waffle.jpg").c_str());
     unsigned int texture3 = loadTexture(FileSystem::getPath("resources/textures/wafflee.jpg").c_str());
 
+    unsigned int finnTexture = loadTexture(FileSystem::getPath("resources/objects/finiii/Finn.png").c_str());
     vector<std::string> faces
             {
                     FileSystem::getPath("resources/textures/skybox/right.png"),
@@ -369,6 +331,9 @@ int main() {
 
     baconShader.use();
     baconShader.setInt("texture2", 1);
+
+    SDShader.use();
+    SDShader.setInt("material.texture_diffuse1", 3);
 
 
 
@@ -398,8 +363,6 @@ int main() {
 
 
 
-
-
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
 
@@ -408,6 +371,9 @@ int main() {
 
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, texture3);
+
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, finnTexture);
 
 
 
@@ -499,36 +465,29 @@ int main() {
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
 
+        //Finn:
 
-        /*
-        pointLight.position = glm::vec3(4.0 * cos(currentFrame), 4.0f, 4.0 * sin(currentFrame));
-        ourShader.setVec3("pointLight.position", pointLight.position);
-        ourShader.setVec3("pointLight.ambient", pointLight.ambient);
-        ourShader.setVec3("pointLight.diffuse", pointLight.diffuse);
-        ourShader.setVec3("pointLight.specular", pointLight.specular);
-        ourShader.setFloat("pointLight.constant", pointLight.constant);
-        ourShader.setFloat("pointLight.linear", pointLight.linear);
-        ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
-        ourShader.setVec3("viewPosition", programState->camera.Position);
-        ourShader.setFloat("material.shininess", 32.0f);
-        // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom),
-                                                (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = programState->camera.GetViewMatrix();
-        ourShader.setMat4("projection", projection);
-        ourShader.setMat4("view", view);
+        SDShader.use();
 
-        // render the loaded model
+        SDShader.setVec3("viewPos", camera.Position);
+        SDShader.setVec3("pointLight.position", lightPos);
+        SDShader.setVec3("pointLight.ambient", glm::vec3(0.2f));
+        SDShader.setVec3("pointLight.diffuse", glm::vec3(1.0f));
+        SDShader.setVec3("pointLight.specular", glm::vec3(1.0f));
+        SDShader.setFloat("pointLight.constant", 1.0f);
+        SDShader.setFloat("pointLight.linear", 0.09f);
+        SDShader.setFloat("pointLight.quadratic", 0.032f);
+        SDShader.setFloat("material.shininess", 32.0f);
+
+        SDShader.setMat4("projection", projection);
+        SDShader.setMat4("view", view);
+
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model,
-                               programState->backpackPosition); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(programState->backpackScale));    // it's a bit too big for our scene, so scale it down
-        ourShader.setMat4("model", model);
-        ourModel.Draw(ourShader);
-
-         */
-
-
+        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 10.0f));
+        model = glm::rotate(model, (float)sin(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.05f));
+        SDShader.setMat4("model", model);
+        SDModel.Draw(SDShader);
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
