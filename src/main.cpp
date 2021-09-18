@@ -378,24 +378,27 @@ int main() {
 
 
         pyramidShader.use();
-        pyramidShader.setVec3("light.direction", camera.Front);
-        pyramidShader.setVec3("light.position", camera.Position);
-        pyramidShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
-        pyramidShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.0f)));
-        pyramidShader.setVec3("viewPos", camera.Position);
+        //direkciono:
+        pyramidShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+        pyramidShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+        pyramidShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+        pyramidShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
 
-        pyramidShader.setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
-        pyramidShader.setVec3("light.diffuse", 0.8f, 0.8f, 0.8f);
-        pyramidShader.setVec3("light.specular", 0.8f, 0.8f, 0.8f);
-
-        pyramidShader.setFloat("light.constant", 1.0f);
-        pyramidShader.setFloat("light.linear", 0.09f);
-        pyramidShader.setFloat("light.quadratic", 0.032f);
+        pyramidShader.setVec3("spotLight.position", camera.Position);
+        pyramidShader.setVec3("spotLight.direction", camera.Front);
+        pyramidShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+        pyramidShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+        pyramidShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+        pyramidShader.setFloat("spotLight.constant", 1.0f);
+        pyramidShader.setFloat("spotLight.linear", 0.09);
+        pyramidShader.setFloat("spotLight.quadratic", 0.032);
+        pyramidShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        pyramidShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
         // material properties
 
-        pyramidShader.setFloat("material.shininess", 32.0f);
+        pyramidShader.setFloat("material.shininess", 64.0f);
 
 
         //piramida1
@@ -483,7 +486,7 @@ int main() {
         SDShader.setMat4("view", view);
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 10.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 10.0f + float(sin(glfwGetTime()))));
         model = glm::rotate(model, (float)sin(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.05f));
         SDShader.setMat4("model", model);
