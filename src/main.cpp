@@ -413,6 +413,8 @@ int main() {
         modelW = glm::scale(modelW, glm::vec3(6.0f));
 
 
+
+
         pyramidShader.setMat4("model", modelW);
 
         glBindVertexArray(WaffleVAO);
@@ -422,6 +424,7 @@ int main() {
         modelW = glm::mat4(1.0f);
         modelW = glm::translate(modelW, glm::vec3(7.0f, 0.0f, -6.0f));
         modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+        modelW = glm::rotate(modelW, float(sin(glfwGetTime())), glm::vec3(0.0f, 0.0f, -1.0f));
         modelW = glm::scale(modelW, glm::vec3(4.0f));
 
         pyramidShader.setMat4("model", modelW);
@@ -433,6 +436,7 @@ int main() {
         modelW = glm::mat4(1.0f);
         modelW = glm::translate(modelW, glm::vec3(-7.0f, 0.0f, -6.0f));
         modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+        modelW = glm::rotate(modelW, float(sin(glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
         modelW = glm::scale(modelW, glm::vec3(4.0f));
         pyramidShader.setMat4("model", modelW);
         glBindVertexArray(WaffleVAO);
@@ -476,18 +480,22 @@ int main() {
         SDShader.setVec3("pointLight.position", lightPos);
         SDShader.setVec3("pointLight.ambient", glm::vec3(0.2f));
         SDShader.setVec3("pointLight.diffuse", glm::vec3(1.0f));
-        SDShader.setVec3("pointLight.specular", glm::vec3(1.0f));
+
         SDShader.setFloat("pointLight.constant", 1.0f);
         SDShader.setFloat("pointLight.linear", 0.09f);
         SDShader.setFloat("pointLight.quadratic", 0.032f);
-        SDShader.setFloat("material.shininess", 32.0f);
+
 
         SDShader.setMat4("projection", projection);
         SDShader.setMat4("view", view);
 
+        glm::vec3 pos;
+        pos.x = sin(glfwGetTime()) ;
+        pos.y = cos(glfwGetTime()) - 2;
+        pos.z = 10.0f;
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 10.0f + float(sin(glfwGetTime()))));
-        model = glm::rotate(model, (float)sin(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::translate(model, pos);
+
         model = glm::scale(model, glm::vec3(0.05f));
         SDShader.setMat4("model", model);
         SDModel.Draw(SDShader);
