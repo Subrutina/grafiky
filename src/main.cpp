@@ -35,6 +35,10 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 bool paused = false;
 
+bool blinn = false;
+bool blinnKeyPressed = false;
+
+
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
 glm::vec3 lightPos(0.0f, 0.0f, 11.0f);
@@ -63,7 +67,7 @@ int main() {
 
     // glfw window creation
     // --------------------
-    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RG projekat", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -398,7 +402,9 @@ int main() {
 
         // material properties
 
-        pyramidShader.setFloat("material.shininess", 64.0f);
+
+        pyramidShader.setBool("blinn", blinn);
+        pyramidShader.setFloat("material.shininess", 16.0f);
 
 
         //piramida1
@@ -528,6 +534,16 @@ void processInput(GLFWwindow *window) {
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && !blinnKeyPressed)
+    {
+        blinn = !blinn;
+        blinnKeyPressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
+    {
+        blinnKeyPressed = false;
+    }
+
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

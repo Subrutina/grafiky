@@ -35,6 +35,8 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
 
+uniform bool blinn;
+
 uniform vec3 viewPos;
 uniform DirLight dirLight;
 
@@ -85,8 +87,17 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+
+    float spec;
+    if(blinn){
+        vec3 halfWayDir = normalize(lightDir + normalize(viewDir));
+        spec = pow(max(dot(normal, halfWayDir), 0.0), material.shininess);
+        }
+    else{
+        vec3 reflectDir = reflect(-lightDir, normal);
+        spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess/4.0f);
+    }
+
     // attenuation
     float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
