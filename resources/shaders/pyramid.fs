@@ -85,9 +85,9 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     //difuzno
     float diff = max(dot(normal, lightDir), 0.0);
 
-
     //spekularno:
     float spec;
+
     if(blinn){
         vec3 halfWayDir = normalize(lightDir + normalize(viewDir));
         spec = pow(max(dot(normal, halfWayDir), 0.0), material.shininess);
