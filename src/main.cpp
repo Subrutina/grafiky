@@ -39,9 +39,9 @@ bool blinn = false;
 bool blinnKeyPressed = false;
 
 
-Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 50.0f));
 
-glm::vec3 lightPos(0.0f, 0.0f, 11.0f);
+glm::vec3 lightPos(0.0f, 2.0f, 13.0f);
 
 
 float lastX = SCR_WIDTH / 2.0f;
@@ -100,9 +100,9 @@ int main() {
     // build and compile shaders
     // -------------------------
     Shader baconShader("resources/shaders/bacon.vs", "resources/shaders/bacon.fs");
-    Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
+
     Shader pyramidShader("resources/shaders/pyramid.vs", "resources/shaders/pyramid.fs");
-    //Shader lightSourceCubeShader("resources/shaders/lightCube.vs", "resources/shaders/lightCube.fs");
+    Shader lightSourceCubeShader("resources/shaders/lightCube.vs", "resources/shaders/lightCube.fs");
     Shader skyBoxShader("resources/shaders/skyBox.vs", "resources/shaders/skyBox.fs");
     Model SDModel("resources/objects/finiii/Finn.obj");
     //SDModel.SetShaderTextureNamePrefix("material.");
@@ -325,7 +325,9 @@ int main() {
     unsigned int cubemapTexture = loadCubeMap(faces);
 
     // don't forget to enable shader before setting uniforms
-    ourShader.use();
+
+
+
     pyramidShader.use();
     pyramidShader.setInt("material.diffuse", 0);
     pyramidShader.setInt("material.specular", 2);
@@ -338,8 +340,6 @@ int main() {
 
     SDShader.use();
     SDShader.setInt("material.texture_diffuse1", 3);
-
-
 
 
     // render loop
@@ -388,7 +388,7 @@ int main() {
         pyramidShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
         pyramidShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
-
+        //spotlight:
         pyramidShader.setVec3("spotLight.position", camera.Position);
         pyramidShader.setVec3("spotLight.direction", camera.Front);
         pyramidShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
@@ -401,11 +401,8 @@ int main() {
         pyramidShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
         // material properties
-
-
         pyramidShader.setBool("blinn", blinn);
-        pyramidShader.setFloat("material.shininess", 16.0f);
-
+        pyramidShader.setFloat("material.shininess", 8.0f);
 
         //piramida1
         pyramidShader.use();
@@ -417,8 +414,6 @@ int main() {
         modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
         modelW = glm::scale(modelW, glm::vec3(6.0f));
-
-
 
 
         pyramidShader.setMat4("model", modelW);
@@ -447,6 +442,21 @@ int main() {
         pyramidShader.setMat4("model", modelW);
         glBindVertexArray(WaffleVAO);
         glDrawArrays(GL_TRIANGLES, 0, 18);
+
+
+        //osvetljenje:
+        modelW = glm::mat4(1.0f);
+        modelW = glm::translate(modelW, lightPos);
+        lightSourceCubeShader.use();
+        lightSourceCubeShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        lightSourceCubeShader.setMat4("model", modelW);
+        lightSourceCubeShader.setMat4("view", view);
+        lightSourceCubeShader.setMat4("projection", projection);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+
 
         //bacon:
         baconShader.use();
@@ -478,8 +488,8 @@ int main() {
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
 
-        //Finn:
 
+        //Finn:
         SDShader.use();
 
         SDShader.setVec3("viewPos", camera.Position);
@@ -490,7 +500,6 @@ int main() {
         SDShader.setFloat("pointLight.constant", 1.0f);
         SDShader.setFloat("pointLight.linear", 0.09f);
         SDShader.setFloat("pointLight.quadratic", 0.032f);
-
 
         SDShader.setMat4("projection", projection);
         SDShader.setMat4("view", view);
