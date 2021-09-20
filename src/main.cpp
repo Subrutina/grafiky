@@ -383,7 +383,7 @@ int main() {
 
         pyramidShader.use();
         //direkciono:
-        pyramidShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+        pyramidShader.setVec3("dirLight.direction", 0.0f, 0.0f, -0.3f);
         pyramidShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
         pyramidShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
         pyramidShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
@@ -444,7 +444,7 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, 18);
 
 
-        //osvetljenje:
+        //osvetljenje modela:
         modelW = glm::mat4(1.0f);
         modelW = glm::translate(modelW, lightPos);
         lightSourceCubeShader.use();
@@ -454,8 +454,6 @@ int main() {
         lightSourceCubeShader.setMat4("projection", projection);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
 
 
         //bacon:
