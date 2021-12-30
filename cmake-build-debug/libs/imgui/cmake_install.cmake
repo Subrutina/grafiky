@@ -1,4 +1,4 @@
-# Install script for directory: /home/tiney/Desktop/grafiky/libs/imgui
+# Install script for directory: /home/tiney/Desktop/rg/libs/imgui
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

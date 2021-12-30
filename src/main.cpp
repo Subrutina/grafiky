@@ -315,12 +315,12 @@ int main() {
     unsigned int finnTexture = loadTexture(FileSystem::getPath("resources/objects/finiii/Finn.png").c_str());
     vector<std::string> faces
             {
-                    FileSystem::getPath("resources/textures/skybox/right.png"),
-                    FileSystem::getPath("resources/textures/skybox/left.png"),
-                    FileSystem::getPath("resources/textures/skybox/top.png"),
-                    FileSystem::getPath("resources/textures/skybox/bottom.png"),
-                    FileSystem::getPath("resources/textures/skybox/front.png"),
-                    FileSystem::getPath("resources/textures/skybox/back.png")
+                    FileSystem::getPath("resources/textures/SkyBox/px.jpg"),
+                    FileSystem::getPath("resources/textures/SkyBox/nx.jpg"),
+                    FileSystem::getPath("resources/textures/SkyBox/py.jpg"),
+                    FileSystem::getPath("resources/textures/SkyBox/ny.jpg"),
+                    FileSystem::getPath("resources/textures/SkyBox/pz.jpg"),
+                    FileSystem::getPath("resources/textures/SkyBox/nz.jpg")
             };
     unsigned int cubemapTexture = loadCubeMap(faces);
 
