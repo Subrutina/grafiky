@@ -100,12 +100,11 @@ int main() {
     // build and compile shaders
     // -------------------------
     Shader baconShader("resources/shaders/bacon.vs", "resources/shaders/bacon.fs");
-
+    Shader portalShader("resources/shaders/portal.vs", "resources/shaders/portal.fs");
     Shader pyramidShader("resources/shaders/pyramid.vs", "resources/shaders/pyramid.fs");
     Shader lightSourceCubeShader("resources/shaders/lightCube.vs", "resources/shaders/lightCube.fs");
     Shader skyBoxShader("resources/shaders/skyBox.vs", "resources/shaders/skyBox.fs");
     Model SDModel("resources/objects/finiii/Finn.obj");
-    //SDModel.SetShaderTextureNamePrefix("material.");
     Shader SDShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     //kocka:
     float vertices[] = {
@@ -187,6 +186,17 @@ int main() {
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
             -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
             -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+
+    float portalVertices[] = {
+            // positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
+            0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+            0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+
+            0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+            1.0f,  0.5f,  0.0f,  1.0f,  0.0f
     };
 
     unsigned int indices[] = {
@@ -292,6 +302,19 @@ int main() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    //portal
+    unsigned int portalVAO, portalVBO;
+    glGenVertexArrays(1, &portalVAO);
+    glGenBuffers(1, &portalVBO);
+    glBindVertexArray(portalVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, portalVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(portalVertices), portalVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
 
     // skybox VAO
     unsigned int skyboxVAO, skyboxVBO;
@@ -311,7 +334,7 @@ int main() {
     unsigned int texture1 = loadTexture(FileSystem::getPath("resources/textures/waffle.jpg").c_str());
     unsigned int texture2 = loadTexture(FileSystem::getPath("resources/textures/kiki.jpg").c_str());
     unsigned int texture3 = loadTexture(FileSystem::getPath("resources/textures/wafflee.jpg").c_str());
-
+    unsigned int portalTexture = loadTexture(FileSystem::getPath("resources/textures/portal.png").c_str());
     unsigned int finnTexture = loadTexture(FileSystem::getPath("resources/objects/finiii/Finn.png").c_str());
     vector<std::string> faces
             {
@@ -340,6 +363,9 @@ int main() {
 
     SDShader.use();
     SDShader.setInt("material.texture_diffuse1", 3);
+
+    portalShader.use();
+    portalShader.setInt("portalTexture", 4);
 
 
     // render loop
@@ -378,6 +404,9 @@ int main() {
 
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, finnTexture);
+
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, portalTexture);
 
 
 
@@ -472,6 +501,18 @@ int main() {
         baconShader.setMat4("model", modelB);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        //portal:
+        glBindVertexArray(portalVAO);
+        portalShader.use();
+        portalShader.setMat4("projection", projection);
+        portalShader.setMat4("view", view);
+        glm::mat4 modelP = glm::mat4(1.0f);
+        modelP = glm::translate(modelP, glm::vec3(-5.0f, -1.0f, 52.0f));
+        modelP = glm::scale(modelP, glm::vec3(10, 5, 2));
+
+        portalShader.setMat4("model", modelP);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         //skybox
         glDepthMask(GL_FALSE);
