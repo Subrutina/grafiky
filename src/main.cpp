@@ -39,7 +39,7 @@ bool blinn = false;
 bool blinnKeyPressed = false;
 
 
-Camera camera(glm::vec3(0.0f, 0.0f, 50.0f));
+Camera camera(glm::vec3(0.0f, -1.0f, 60.0f));
 
 glm::vec3 lightPos(0.0f, 2.0f, 13.0f);
 
