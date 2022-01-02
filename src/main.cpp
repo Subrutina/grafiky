@@ -97,6 +97,11 @@ int main() {
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+
+
     // build and compile shaders
     // -------------------------
     Shader baconShader("resources/shaders/bacon.vs", "resources/shaders/bacon.fs");
@@ -108,12 +113,13 @@ int main() {
     Shader SDShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     //kocka:
     float vertices[] = {
+
             -0.5f, -0.5f, -0.5f,
+            0.5f,  0.5f, -0.5f,
             0.5f, -0.5f, -0.5f,
             0.5f,  0.5f, -0.5f,
-            0.5f,  0.5f, -0.5f,
-            -0.5f,  0.5f, -0.5f,
             -0.5f, -0.5f, -0.5f,
+            -0.5f,  0.5f, -0.5f,
 
             -0.5f, -0.5f,  0.5f,
             0.5f, -0.5f,  0.5f,
@@ -130,11 +136,11 @@ int main() {
             -0.5f,  0.5f,  0.5f,
 
             0.5f,  0.5f,  0.5f,
+            0.5f, -0.5f, -0.5f,
             0.5f,  0.5f, -0.5f,
             0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f,  0.5f,
             0.5f,  0.5f,  0.5f,
+            0.5f, -0.5f,  0.5f,
 
             -0.5f, -0.5f, -0.5f,
             0.5f, -0.5f, -0.5f,
@@ -144,11 +150,11 @@ int main() {
             -0.5f, -0.5f, -0.5f,
 
             -0.5f,  0.5f, -0.5f,
+            0.5f,  0.5f,  0.5f,
             0.5f,  0.5f, -0.5f,
             0.5f,  0.5f,  0.5f,
-            0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
             -0.5f,  0.5f, -0.5f,
+            -0.5f,  0.5f,  0.5f,
     };
 
     //waffle piramida:
@@ -387,6 +393,7 @@ int main() {
         glClearColor(0.0f, 0.0f, 1.0f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -491,6 +498,7 @@ int main() {
         baconShader.setMat4("view", view);
 
         glBindVertexArray(BaconVAO);
+        glDisable(GL_CULL_FACE);
 
         glm::mat4 modelB = glm::mat4(1.0f);
         modelB = glm::translate(modelB, glm::vec3(0.0f, -4.5f, 2.0f));
@@ -501,18 +509,25 @@ int main() {
         baconShader.setMat4("model", modelB);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glEnable(GL_CULL_FACE);
 
-        //portal:
+        //portali:
         glBindVertexArray(portalVAO);
+        glDisable(GL_CULL_FACE);
         portalShader.use();
         portalShader.setMat4("projection", projection);
         portalShader.setMat4("view", view);
         glm::mat4 modelP = glm::mat4(1.0f);
         modelP = glm::translate(modelP, glm::vec3(-5.0f, -1.0f, 52.0f));
         modelP = glm::scale(modelP, glm::vec3(10, 5, 2));
-
         portalShader.setMat4("model", modelP);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+        glEnable(GL_CULL_FACE);
+
+
+
+
+
 
         //skybox
         glDepthMask(GL_FALSE);
