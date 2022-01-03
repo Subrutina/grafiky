@@ -416,7 +416,7 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, portalTexture);
 
 
-
+        //osvetljenje piramida: 
         pyramidShader.use();
         //direkciono:
         pyramidShader.setVec3("dirLight.direction", 0.0f, 0.0f, -0.3f);
@@ -564,6 +564,7 @@ int main() {
         pos.z = 10.0f;
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, pos);
+
 
         model = glm::scale(model, glm::vec3(0.05f));
         SDShader.setMat4("model", model);
