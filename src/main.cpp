@@ -416,7 +416,7 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, portalTexture);
 
 
-        //osvetljenje piramida: 
+        //osvetljenje piramida:
         pyramidShader.use();
         //direkciono:
         pyramidShader.setVec3("dirLight.direction", 0.0f, 0.0f, -0.3f);
