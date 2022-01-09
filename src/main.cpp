@@ -38,10 +38,16 @@ bool paused = false;
 bool blinn = false;
 bool blinnKeyPressed = false;
 
+bool hdr = true;
+bool hdrKeyPressed = false;
+float exposure = 1.0f;
+
 
 Camera camera(glm::vec3(0.0f, -1.0f, 60.0f));
 
 glm::vec3 lightPos(0.0f, 2.0f, 13.0f);
+
+
 
 
 float lastX = SCR_WIDTH / 2.0f;
@@ -111,6 +117,9 @@ int main() {
     Shader skyBoxShader("resources/shaders/skyBox.vs", "resources/shaders/skyBox.fs");
     Model SDModel("resources/objects/finiii/Finn.obj");
     Shader SDShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
+
+
+
     //kocka:
     float vertices[] = {
 
@@ -344,12 +353,12 @@ int main() {
     unsigned int finnTexture = loadTexture(FileSystem::getPath("resources/objects/finiii/Finn.png").c_str());
     vector<std::string> faces
             {
-                    FileSystem::getPath("resources/textures/SkyBox/px.jpg"),
-                    FileSystem::getPath("resources/textures/SkyBox/nx.jpg"),
-                    FileSystem::getPath("resources/textures/SkyBox/py.jpg"),
-                    FileSystem::getPath("resources/textures/SkyBox/ny.jpg"),
-                    FileSystem::getPath("resources/textures/SkyBox/pz.jpg"),
-                    FileSystem::getPath("resources/textures/SkyBox/nz.jpg")
+                    FileSystem::getPath("resources/textures/skyboX/px.png"),
+                    FileSystem::getPath("resources/textures/skyboX/nx.png"),
+                    FileSystem::getPath("resources/textures/skyboX/py.png"),
+                    FileSystem::getPath("resources/textures/skyboX/ny.png"),
+                    FileSystem::getPath("resources/textures/skyboX/pz.png"),
+                    FileSystem::getPath("resources/textures/skyboX/nz.png")
             };
     unsigned int cubemapTexture = loadCubeMap(faces);
 
@@ -372,6 +381,11 @@ int main() {
 
     portalShader.use();
     portalShader.setInt("portalTexture", 4);
+
+
+
+
+
 
 
     // render loop
@@ -419,7 +433,7 @@ int main() {
         //osvetljenje piramida:
         pyramidShader.use();
         //direkciono:
-        pyramidShader.setVec3("dirLight.direction", 0.0f, 0.0f, -0.3f);
+        pyramidShader.setVec3("dirLight.direction", 0.0f, 0.0f, -5.0f);
         pyramidShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
         pyramidShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
         pyramidShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
@@ -481,10 +495,11 @@ int main() {
 
 
         //osvetljenje modela:
+
         modelW = glm::mat4(1.0f);
         modelW = glm::translate(modelW, lightPos);
         lightSourceCubeShader.use();
-        lightSourceCubeShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        lightSourceCubeShader.setVec3("lightColor", glm::vec3(1.0f, 0.0f, 1.0f));
         lightSourceCubeShader.setMat4("model", modelW);
         lightSourceCubeShader.setMat4("view", view);
         lightSourceCubeShader.setMat4("projection", projection);
@@ -511,7 +526,7 @@ int main() {
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glEnable(GL_CULL_FACE);
 
-        //portali:
+        //portal:
         glBindVertexArray(portalVAO);
         glDisable(GL_CULL_FACE);
         portalShader.use();
@@ -523,9 +538,6 @@ int main() {
         portalShader.setMat4("model", modelP);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glEnable(GL_CULL_FACE);
-
-
-
 
 
 
@@ -545,11 +557,10 @@ int main() {
 
         //Finn:
         SDShader.use();
-
         SDShader.setVec3("viewPos", camera.Position);
         SDShader.setVec3("pointLight.position", lightPos);
-        SDShader.setVec3("pointLight.ambient", glm::vec3(0.2f));
-        SDShader.setVec3("pointLight.diffuse", glm::vec3(1.0f));
+        SDShader.setVec3("pointLight.ambient", glm::vec3(1.0, 1.0, 1.0));
+        SDShader.setVec3("pointLight.diffuse", glm::vec3(1.0,0.0,1.0));
 
         SDShader.setFloat("pointLight.constant", 1.0f);
         SDShader.setFloat("pointLight.linear", 0.09f);
@@ -692,7 +703,7 @@ unsigned int loadCubeMap(vector<std::string> faces){
         if(data){
             //u redosledu kojem smo naveli teksture sada se mapiraju na cubeMap
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
-                         GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+                         GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         }
         else{
             std::cerr << "Failed to load cube map texture\n";

@@ -1,4 +1,5 @@
 #version 330 core
+
 out vec4 FragColor;
 
 struct PointLight {
@@ -47,5 +48,7 @@ void main()
     vec3 normal = normalize(Normal);
     vec3 viewDir = normalize(viewPosition - FragPos);
     vec3 result = CalcPointLight(pointLight, normal, FragPos, viewDir);
+
+
     FragColor = vec4(result, 1.0);
 }
