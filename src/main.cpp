@@ -17,24 +17,18 @@
 #include <iostream>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
-
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
-
 void processInput(GLFWwindow *window);
-
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-
-
 unsigned int loadTexture(char const * path);
 unsigned int loadCubeMap(vector<std::string> faces);
+void renderQuad();
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 bool paused = false;
-
 bool blinn = false;
 bool blinnKeyPressed = false;
 
@@ -46,10 +40,6 @@ float exposure = 1.0f;
 Camera camera(glm::vec3(0.0f, -1.0f, 60.0f));
 
 glm::vec3 lightPos(0.0f, 2.0f, 13.0f);
-
-
-
-
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -117,7 +107,7 @@ int main() {
     Shader skyBoxShader("resources/shaders/skyBox.vs", "resources/shaders/skyBox.fs");
     Model SDModel("resources/objects/finiii/Finn.obj");
     Shader SDShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
-
+    Shader hdrShader("resources/shaders/hdr.vs", "resources/shaders/hdr.fs");
 
 
     //kocka:
@@ -342,6 +332,30 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 
+    unsigned int hdrFBO;
+    glGenFramebuffers(1, &hdrFBO);
+    // create floating point color buffer
+    unsigned int colorBuffer;
+    glGenTextures(1, &colorBuffer);
+    glBindTexture(GL_TEXTURE_2D, colorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // create depth buffer (renderbuffer)
+    unsigned int rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+
+    // attach buffers
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "Framebuffer not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     //teksture:
 
     stbi_set_flip_vertically_on_load(false);
@@ -362,9 +376,6 @@ int main() {
             };
     unsigned int cubemapTexture = loadCubeMap(faces);
 
-    // don't forget to enable shader before setting uniforms
-
-
 
     pyramidShader.use();
     pyramidShader.setInt("material.diffuse", 0);
@@ -382,11 +393,8 @@ int main() {
     portalShader.use();
     portalShader.setInt("portalTexture", 4);
 
-
-
-
-
-
+    hdrShader.use();
+    hdrShader.setInt("hdrBuffer", 0);
 
     // render loop
     // -----------
@@ -407,6 +415,9 @@ int main() {
         glClearColor(0.0f, 0.0f, 1.0f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        //renderovanje scene u floating point buffer:
+        glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -433,7 +444,7 @@ int main() {
         //osvetljenje piramida:
         pyramidShader.use();
         //direkciono:
-        pyramidShader.setVec3("dirLight.direction", 0.0f, 0.0f, -5.0f);
+        pyramidShader.setVec3("dirLight.direction", -5.0f, 0.0f, 0.0f);
         pyramidShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
         pyramidShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
         pyramidShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
@@ -581,7 +592,16 @@ int main() {
         SDShader.setMat4("model", model);
         SDModel.Draw(SDShader);
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+        //2. deo - renderovanje floating point color buffera na 2d povrsinu i vracanje na ldr tj. opseg [0,1]
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        hdrShader.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, colorBuffer);
+        hdrShader.setInt("hdr", hdr);
+        hdrShader.setFloat("exposure", exposure);
+        renderQuad();
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -619,6 +639,9 @@ void processInput(GLFWwindow *window) {
         blinnKeyPressed = false;
     }
 
+    if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
+        exposure = 0.1f;
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -733,4 +756,33 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
         glfwSetWindowShouldClose(window, true);
     }
+}
+
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad()
+{
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+                // positions        // texture Coords
+                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 }
