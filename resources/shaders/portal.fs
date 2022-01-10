@@ -5,6 +5,7 @@ in vec2 TexCoords;
 
 uniform sampler2D portalTexture;
 
+
 void main()
 {
     vec4 texColor = texture(portalTexture, TexCoords);
