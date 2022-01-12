@@ -22,14 +22,14 @@ The brick archway is used to implement normal mapping. It is combined with blend
 
 
 ### Controls
-| Key | Description                                                        |
-| :---  |:-------------------------------------------------------------------|
-| ```W``` , ```A```, ```S```, ```D``` | Moving the camera                                                  |
-| ```Mouse left/right/up/down``` | Changing the camera angle                                          |
-| ```Mouse scroll``` | Zooming the camera                                                 |
-| ```ESC``` | Exiting the scene                                                  |
-|```L```| Moving light source position for the archway to the front          |
-|```O```| Moving light source position for the archway backwards             |
-|```F```| Moving light source position for Finn to the left                  |
-|```R```| Moving light source position for Finn to the right                 |
-|```B```| Changing reflection model from Phong to Blinn-Phong and vice versa |
+| Key | Description                                                      |
+| :---  |:-----------------------------------------------------------------|
+| ```W``` , ```A```, ```S```, ```D``` | Move the camera                                                  |
+| ```Mouse left/right/up/down``` | Change the camera angle                                          |
+| ```Mouse scroll``` | Zoom the camera                                                  |
+| ```ESC``` | Exit the scene                                                   |
+|```L```| Move light source position for the archway to the front          |
+|```O```| Move light source position for the archway backwards             |
+|```F```| Move light source position for Finn to the left                  |
+|```R```| Move light source position for Finn to the right                 |
+|```B```| Change reflection model from Phong to Blinn-Phong and vice versa |
