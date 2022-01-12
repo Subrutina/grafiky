@@ -43,7 +43,8 @@ void renderQuad();
 Camera camera(glm::vec3(0.0f, -1.0f, 60.0f));
 
 glm::vec3 lightPos(0.0f, 2.0f, 13.0f);
-glm::vec3 lightPos1(0.0f, 0.0f, -30.0f);
+
+glm::vec3 lightPos1(0.0f, -1.0f, -30.0f);
 
 
 
@@ -413,7 +414,6 @@ int main() {
         glm::mat4 view = camera.GetViewMatrix();
 
 
-
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
 
@@ -439,7 +439,7 @@ int main() {
         //osvetljenje piramida:
         pyramidShader.use();
         //direkciono:
-        pyramidShader.setVec3("dirLight.direction", 0.0f, 0.0f, -5.0f);
+        pyramidShader.setVec3("dirLight.direction", 0.0f, 0.0f, 30.0f);
         pyramidShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
         pyramidShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
         pyramidShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
@@ -465,48 +465,47 @@ int main() {
         pyramidShader.setMat4("projection", projection);
         pyramidShader.setMat4("view", view);
 
-        glm::mat4 modelW = glm::mat4(1.0f);
-        modelW = glm::translate(modelW, glm::vec3(0.0f, 0.0f, -3.0f));
-        modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
-        modelW = glm::scale(modelW, glm::vec3(6.0f));
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(6.0f));
 
 
-        pyramidShader.setMat4("model", modelW);
+        pyramidShader.setMat4("model", model);
 
         glBindVertexArray(WaffleVAO);
         glDrawArrays(GL_TRIANGLES, 0, 18);
 
         //piramida2:
-        modelW = glm::mat4(1.0f);
-        modelW = glm::translate(modelW, glm::vec3(7.0f, 0.0f, -6.0f));
-        modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
-        modelW = glm::rotate(modelW, float(sin(glfwGetTime())), glm::vec3(0.0f, 0.0f, -1.0f));
-        modelW = glm::scale(modelW, glm::vec3(4.0f));
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(7.0f, 0.0f, -6.0f));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, float(sin(glfwGetTime())), glm::vec3(0.0f, 0.0f, -1.0f));
+        model = glm::scale(model, glm::vec3(4.0f));
 
-        pyramidShader.setMat4("model", modelW);
+        pyramidShader.setMat4("model", model);
 
         glBindVertexArray(WaffleVAO);
         glDrawArrays(GL_TRIANGLES, 0, 18);
 
         //piramida3:
-        modelW = glm::mat4(1.0f);
-        modelW = glm::translate(modelW, glm::vec3(-7.0f, 0.0f, -6.0f));
-        modelW = glm::rotate(modelW, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
-        modelW = glm::rotate(modelW, float(sin(glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
-        modelW = glm::scale(modelW, glm::vec3(4.0f));
-        pyramidShader.setMat4("model", modelW);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-7.0f, 0.0f, -6.0f));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, float(sin(glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(4.0f));
+        pyramidShader.setMat4("model", model);
         glBindVertexArray(WaffleVAO);
         glDrawArrays(GL_TRIANGLES, 0, 18);
 
 
-        //osvetljenje modela:
-
-        modelW = glm::mat4(1.0f);
-        modelW = glm::translate(modelW, lightPos);
+        //izvor osvetljenja modela:
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
         lightSourceCubeShader.use();
         lightSourceCubeShader.setVec3("lightColor", glm::vec3(1.0f, 0.0f, 1.0f));
-        lightSourceCubeShader.setMat4("model", modelW);
+        lightSourceCubeShader.setMat4("model", model);
         lightSourceCubeShader.setMat4("view", view);
         lightSourceCubeShader.setMat4("projection", projection);
         glBindVertexArray(VAO);
@@ -521,16 +520,17 @@ int main() {
         glBindVertexArray(BaconVAO);
         glDisable(GL_CULL_FACE);
 
-        glm::mat4 modelB = glm::mat4(1.0f);
-        modelB = glm::translate(modelB, glm::vec3(0.0f, -4.5f, 2.0f));
-        modelB = glm::rotate(modelB, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        modelB = glm::rotate(modelB, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        modelB = glm::scale(modelB, glm::vec3(100.0f, 6.0f, 3.0f));
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -4.5f, 2.0f));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(100.0f, 6.0f, 3.0f));
 
-        baconShader.setMat4("model", modelB);
+        baconShader.setMat4("model", model);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glEnable(GL_CULL_FACE);
+
 
         //portal:
         glBindVertexArray(portalVAO);
@@ -538,10 +538,10 @@ int main() {
         portalShader.use();
         portalShader.setMat4("projection", projection);
         portalShader.setMat4("view", view);
-        glm::mat4 modelP = glm::mat4(1.0f);
-        modelP = glm::translate(modelP, glm::vec3(-5.0f, -1.0f, 52.0f));
-        modelP = glm::scale(modelP, glm::vec3(10, 5, 2));
-        portalShader.setMat4("model", modelP);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-5.0f, -1.0f, 52.0f));
+        model = glm::scale(model, glm::vec3(10, 5, 2));
+        portalShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glEnable(GL_CULL_FACE);
 
@@ -551,17 +551,25 @@ int main() {
         archwayShader.setMat4("view", view);
         archwayShader.setVec3("viewPos", camera.Position);
         archwayShader.setVec3("lightPos", lightPos1);
-        modelP = glm::mat4(1.0f);
-        modelP = glm::translate(modelP, glm::vec3(0.0f, -1.0f, -46.0f));
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, -46.0f));
        // modelP = glm::rotate(modelP, glm::radians((float)glfwGetTime() * 20.0f), glm::normalize(glm::vec3(0.0, 1.0, 0.0))); // rotate the quad to show normal mapping from multiple directions
-        modelP = glm::scale(modelP, glm::vec3(2, 2, 10));
-        archwayShader.setMat4("model", modelP);
+        model = glm::scale(model, glm::vec3(2, 2, 10));
+        archwayShader.setMat4("model", model);
         glDisable(GL_CULL_FACE);
         renderQuad();
         glEnable(GL_CULL_FACE);
 
-
-
+        //izvor osvetljenja za archway:
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos1);
+        lightSourceCubeShader.use();
+        lightSourceCubeShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        lightSourceCubeShader.setMat4("model", model);
+        lightSourceCubeShader.setMat4("view", view);
+        lightSourceCubeShader.setMat4("projection", projection);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         //skybox
         glDepthMask(GL_FALSE);
@@ -581,8 +589,8 @@ int main() {
         SDShader.use();
         SDShader.setVec3("viewPos", camera.Position);
         SDShader.setVec3("pointLight.position", lightPos);
-        SDShader.setVec3("pointLight.ambient", glm::vec3(1.0, 1.0, 1.0));
-        SDShader.setVec3("pointLight.diffuse", glm::vec3(1.0,0.0,1.0));
+        SDShader.setVec3("pointLight.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
+        SDShader.setVec3("pointLight.diffuse", glm::vec3(1.0f,0.0f,1.0f));
 
         SDShader.setFloat("pointLight.constant", 1.0f);
         SDShader.setFloat("pointLight.linear", 0.09f);
@@ -595,7 +603,7 @@ int main() {
         pos.x = sin(glfwGetTime()) ;
         pos.y = cos(glfwGetTime()) - 2;
         pos.z = 10.0f;
-        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::mat4(1.0f);
         model = glm::translate(model, pos);
 
 
@@ -639,6 +647,21 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
     {
         blinnKeyPressed = false;
+    }
+    if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
+
+        lightPos1.z -= 0.25f;
+    }
+    if(glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){
+        lightPos1.z += 0.25f;
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS){
+
+        lightPos.x -= 0.25f;
+    }
+    if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
+        lightPos.x += 0.25f;
     }
 
 }
@@ -745,7 +768,6 @@ unsigned int loadCubeMap(vector<std::string> faces){
     return textureID;
 
 }
-
 
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
