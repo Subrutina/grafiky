@@ -1,6 +1,6 @@
-#Computer Graphics OpenGL project, Kristina Milosevic 127/2018
+# Computer Graphics OpenGL project, Kristina Milosevic 127/2018
 
-#Description
+## Description
 Pyramid objects have directional and spotlight lighting - by pressing B on your keyboard, 
 the lighting changes from Phong to Blinn-Phong reflection model.
 
@@ -21,7 +21,7 @@ The brick archway is used to implement normal mapping. It is combined with blend
 
 
 
-## Controls
+### Controls
 | Key | Description                                                        |
 | :---  |:-------------------------------------------------------------------|
 | ```W``` , ```A```, ```S```, ```D``` | Moving the camera                                                  |
