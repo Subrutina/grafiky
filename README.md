@@ -1,27 +1,35 @@
-# Computer Graphics OpenGL project, Kristina Milosevic 127/2018
+# Computer Graphics OpenGL project, Kristina Milosevic, Faculty of Mathematics, University of Belgrade
 
-## Description
-Pyramid objects have directional and spotlight lighting - by pressing B on your keyboard, 
-the lighting changes from Phong to Blinn-Phong reflection model.
+This project showcases several basic and advanced techniques in OpenGL to demonstrate various lighting models, shading techniques, blending, and texturing.
 
-The object of Finn the Human has a point light source of lighting. The model doesn't have a specular component so
-the Phong reflection model is used.
+## Components Overview
+
+### 1. **Pyramid Objects**
+- **Lighting:** Directional and spotlight lighting.
+- **Shading Model:** By pressing **B**, you can switch between the **Phong** and **Blinn-Phong** reflection models, giving you the opportunity to explore different shading effects on the pyramid objects.
+
+### 2. **Finn the Human Model**
+- **Lighting:** Point light source.
+- **Shading Model:** Uses the **Phong reflection model** since the model doesn't include a specular component. This highlights how point lighting interacts with the surface for diffuse reflections.
+
+### 3. **Fire Portal**
+- **Blending:** Implements fragment discarding for creating a blending effect, which is commonly used for transparent or semi-transparent effects.
+
+### 4. **Bacon Road and Portal**
+- **Lighting:** These objects are **unlit**, emphasizing their texture or appearance without the impact of lighting.
+
+### 5. **Desert Background (SkyBox)**
+- **Cubemaps:** The desert background is implemented as a **SkyBox**, using cubemaps to render a 360-degree environment.
+
+### 6. **Brick Archway**
+- **Normal Mapping:** This object demonstrates **normal mapping** to give the surface more detail by simulating small surface bumps.
+- **Blending:** Combined with blending to enhance visual effects.
 
 
-The fire portal is the example of using blending, specifically discarding fragments.
 
 
-The bacon road and the portal aren't lit. 
-
-The desert background is an implementation of SkyBox(Cubemaps).
-
-
-The brick archway is used to implement normal mapping. It is combined with blending.
-
-
-
-
-### Controls
+## Controls
+Once the project is built and running, use the following commands to explore the functionalities:
 | Key | Description                                                     |
 | :---  |:----------------------------------------------------------------|
 | ```W``` , ```A```, ```S```, ```D``` | Move the camera                                                 |
